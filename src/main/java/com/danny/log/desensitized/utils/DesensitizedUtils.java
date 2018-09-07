@@ -1,56 +1,45 @@
 package com.danny.log.desensitized.utils;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.danny.log.desensitized.annotation.Desensitized;
+import com.danny.log.desensitized.enums.RoleTypeEnum;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
- * @author huyuyang@lxfintech.com
- * @Title: DesensitizedUtils
- * @Copyright: Copyright (c) 2016
- * @Description:
- * @Company: lxjr.com
- * @Created on 2017-06-07 15:04:33
+ * @Author duhongming
+ * @Email 19919902414@189.cn
+ * @Date 2018/9/6 15:10
  */
-public class DesensitizedUtils {
+public class DesensitizedUtils<T> {
+    private List<String> roles;
+    public T getDesensitizedObject(T javaBean) {
+        return this.getDesensitizedObject(javaBean,new ArrayList<>());
+    }
 
-    /**
-     * 获取脱敏json串(递归引用会导致java.lang.StackOverflowError)
-     *
-     * @param javaBean
-     * @return
-     */
-    public static String getJson(Object javaBean) {
-        String json = null;
-        if (null != javaBean) {
-            try {
-                if (javaBean.getClass().isInterface()) return json;
-                /* 克隆出一个实体进行字段修改，避免修改原实体 */
-                //Object clone =ObjectUtils.deepCloneObject(javaBean);
-                //Object clone =ObjectUtils.deepCloneByFastJson(javaBean);
-                Object clone = ObjectUtils.deepClone(javaBean);
+    public T getDesensitizedObject(T javaBean,List<String> roles) {
+        this.roles = roles;
+        try{
+            /* 克隆出一个实体进行字段修改，避免修改原实体 */
+            //Object clone =ObjectUtils.deepCloneObject(javaBean);
+            //Object clone =ObjectUtils.deepCloneByFastJson(javaBean);
+            T clone = (T)ObjectUtils.deepClone(javaBean);
 
-                /* 定义一个计数器，用于避免重复循环自定义对象类型的字段 */
-                Set<Integer> referenceCounter = new HashSet<Integer>();
+            /* 定义一个计数器，用于避免重复循环自定义对象类型的字段 */
+            Set<Integer> referenceCounter = new HashSet<Integer>();
 
-                /* 对克隆实体进行脱敏操作 */
-                DesensitizedUtils.replace(ObjectUtils.getAllFields(clone), clone, referenceCounter);
+            /* 对克隆实体进行脱敏操作 */
+            this.replace(ObjectUtils.getAllFields(clone), clone, referenceCounter);
 
-                /* 利用fastjson对脱敏后的克隆对象进行序列化 */
-                json = JSON.toJSONString(clone, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullListAsEmpty);
-
-                /* 清空计数器 */
-                referenceCounter.clear();
-                referenceCounter = null;
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
+            /* 清空计数器 */
+            referenceCounter.clear();
+            return clone;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
-        return json;
     }
 
     /**
@@ -62,7 +51,7 @@ public class DesensitizedUtils {
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
      */
-    private static void replace(Field[] fields, Object javaBean, Set<Integer> referenceCounter) throws IllegalArgumentException, IllegalAccessException {
+    private void replace(Field[] fields, Object javaBean, Set<Integer> referenceCounter) throws IllegalArgumentException, IllegalAccessException {
         if (null != fields && fields.length > 0) {
             for (Field field : fields) {
                 field.setAccessible(true);
@@ -132,7 +121,7 @@ public class DesensitizedUtils {
      * @param referenceCounter
      * @return
      */
-    private static boolean isNotGeneralType(Class<?> clazz, Object value, Set<Integer> referenceCounter) {
+    private boolean isNotGeneralType(Class<?> clazz, Object value, Set<Integer> referenceCounter) {
         return !clazz.isPrimitive()
                 && clazz.getPackage() != null
                 && !clazz.isEnum()
@@ -152,197 +141,349 @@ public class DesensitizedUtils {
      * @param value
      * @throws IllegalAccessException
      */
-    public static void setNewValueForField(Object javaBean, Field field, Object value) throws IllegalAccessException {
+    public void setNewValueForField(Object javaBean, Field field, Object value) throws IllegalAccessException {
         //处理自身的属性
         Desensitized annotation = field.getAnnotation(Desensitized.class);
-        if (field.getType().equals(String.class) && null != annotation && executeIsEffictiveMethod(javaBean, annotation)) {
+        if (field.getType().equals(String.class) && null != annotation
+            //&& executeIsEffictiveMethod(javaBean, annotation)
+                ) {
             String valueStr = (String) value;
             if (StringUtils.isNotBlank(valueStr)) {
-                switch (annotation.type()) {
-                    case CHINESE_NAME: {
-                        field.set(javaBean, DesensitizedUtils.chineseName(valueStr));
-                        break;
+
+                boolean isDesensitized = false;
+                //角色判断以及动态分配脱敏规则
+                if (CollectionUtils.isNotEmpty(this.roles)){
+                    for(RoleTypeEnum roleTypeEnum : annotation.role()){
+                        if(this.roles.contains(roleTypeEnum.toString())){
+                            isDesensitized = true;
+                            break;
+                        }
                     }
-                    case ID_CARD: {
-                        field.set(javaBean, DesensitizedUtils.idCardNum(valueStr));
-                        break;
-                    }
-                    case FIXED_PHONE: {
-                        field.set(javaBean, DesensitizedUtils.fixedPhone(valueStr));
-                        break;
-                    }
-                    case MOBILE_PHONE: {
-                        field.set(javaBean, DesensitizedUtils.mobilePhone(valueStr));
-                        break;
-                    }
-                    case ADDRESS: {
-                        field.set(javaBean, DesensitizedUtils.address(valueStr, 8));
-                        break;
-                    }
-                    case EMAIL: {
-                        field.set(javaBean, DesensitizedUtils.email(valueStr));
-                        break;
-                    }
-                    case BANK_CARD: {
-                        field.set(javaBean, DesensitizedUtils.bankCard(valueStr));
-                        break;
-                    }
-                    case PASSWORD: {
-                        field.set(javaBean, DesensitizedUtils.password(valueStr));
-                        break;
-                    }
+                }else{
+                    isDesensitized = true;
+                }
+                if(isDesensitized){
+                    field.set(javaBean, annotation.type().getDesensitizedType().setDesensitizedStr(valueStr).desensitized());
                 }
             }
         }
     }
 
+
+    /////////////////////////////////////车联网平台数据脱敏/////////////////////////////////////////////////////////
+
     /**
-     * 执行某个对象中指定的方法
      *
-     * @param javaBean     对象
-     * @param desensitized
-     * @return
+     * @param data--1
+     * @return 姓名
      */
-    private static boolean executeIsEffictiveMethod(Object javaBean, Desensitized desensitized) {
-        boolean isAnnotationEffictive = true;//注解默认生效
-        if (desensitized != null) {
-            String isEffictiveMethod = desensitized.isEffictiveMethod();
-            if (isNotEmpty(isEffictiveMethod)) {
-                try {
-                    Method method = javaBean.getClass().getMethod(isEffictiveMethod);
-                    method.setAccessible(true);
-                    isAnnotationEffictive = (Boolean) method.invoke(javaBean);
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
+    private static  String getName(String data){
+        int length = data.length();
+        if(length>0&&length<=3){//3个字以内隐藏第1个字
+            data = data.replace(data.charAt(0), '*');
+        }else if(length>=4&&length<=6){//4-6个字隐藏前2个字
+            data = data.replace(data.charAt(0), '*').replace(data.charAt(1), '*');
+        }else {//大于6个字隐藏第3-6个字
+            data = data.substring(0, 2)+getReplaceCharStr(4)+data.substring(5);
+        }
+        return data;
+    }
+    /**
+     *
+     * @param data--2
+     * @return 返回企业名称 ；
+     */
+    private static String getEnterpriseName(String data){
+
+        int length = data.length();
+        if(length<=2){
+            return getDefault(data);//规则之外走默认
+        }else if(length>2&&length<=4){//长度4个字及以下的，首尾各保留1个字
+            data = data.substring(0, 1)+getReplaceCharStr(length-2)+data.substring(length-1);
+        }else if(length>=5&&length<=6){//长度5-6个字的，首尾各保留2个字；
+            data = data.substring(0, 2)+getReplaceCharStr(length-4)+data.substring(length-2);
+        }else if(length>=7&&length%2!=0) {//长度7个字及以上奇数，隐去中间3个字；
+            int middelIndex=(length+1)/2-1;
+            data = data.replace(data.charAt(middelIndex-1), '*').replace(data.charAt(middelIndex), '*').replace(data.charAt(middelIndex+1), '*');
+        }else if(length>=8&&length%2==0){//长度8个字及以上偶数，隐去中间4个字；
+            int startIndex=length/2-2;
+            int endIndex = length/2+2;
+            data = data.substring(0,startIndex)+getReplaceCharStr(length-4)+data.substring(endIndex);
+        }
+        return data;
+    }
+    /**
+     *
+     * @param data--3
+     * @return 保留前3位和最后3位
+     */
+    private static String getBothSides3(String data){
+        int length = data.length();
+        if(length>6){
+            data = data.substring(0,3)+getReplaceCharStr(length-6)+data.substring(length-3);
+            return data;
+        }
+
+        return getDefault(data);
+    }
+
+    /**
+     *
+     * @param data--4
+     * @return  网站账户||微信 。分段屏蔽，每隔2位用*替换2位
+     */
+    private static String getNetworkAccount(String data){
+        String reg2 = "";
+        String res = "";
+        int group = (data.length()+1)/2;
+        for(int i=1;i<=(data.length()+1)/2;i++){
+
+            if(i%2==1){
+                res += "$" + i;
+            }else{
+                if(i<group){
+                    res +="**";
+                }else{
+                    if(data.length()%2==0){
+                        res +="**";
+                    }else{
+                        res +="*";
+                    }
+                }
+            }
+            if(i<group){
+                reg2 +="(\\d{2})";
+            }else{
+                if(data.length()%2==0){
+                    reg2 +="(\\d{2})";
+                }else{
+                    reg2 +="(\\d{1})";
                 }
             }
         }
-        return isAnnotationEffictive;
-    }
 
-    private static boolean isNotEmpty(String str) {
-        return str != null && !"".equals(str);
-    }
-
-    private static boolean isEmpty(String str) {
-        return !isNotEmpty(str);
+        data = data.replaceAll(reg2, res);
+        return data;
     }
 
     /**
-     * 【中文姓名】只显示第一个汉字，其他隐藏为2个星号，比如：李**
      *
-     * @param fullName
-     * @return
+     * @param data--5
+     * @return TODO:针对具体地址来设定规则，这里走默认
      */
-    public static String chineseName(String fullName) {
-        if (StringUtils.isBlank(fullName)) {
-            return "";
-        }
-        String name = StringUtils.left(fullName, 1);
-        return StringUtils.rightPad(name, StringUtils.length(fullName), "*");
+    private static String getElecAddr(String data){
+
+        return getDefault(data);
     }
 
     /**
-     * 【身份证号】显示最后四位，其他隐藏。共计18位或者15位，比如：*************1234
      *
-     * @param id
-     * @return
+     * @param data--6
+     * @return 联系人地址、法人地址
      */
-    public static String idCardNum(String id) {
-        if (StringUtils.isBlank(id)) {
-            return "";
+    private static String getCommonAddr(String data){
+        int length = data.length();
+        if(length<=3){
+            return getDefault(data);//规则之外走默认
+        }else if(length>3&&length<=5){//长度5个字及以下的，保留第1个字和最后2个字
+            data = data.substring(0, 1)+getReplaceCharStr(length-3)+data.substring(length-2);
+        }else if (length>=6&&length<=9){//长度6-9个字的，保留最后5个字；
+            data = getReplaceCharStr(length-5)+data.substring(length-5);
+        }else {//长度为10个字及以上的，隐去最后5个字之前的4个字；
+            data = data.substring(0, length-9)+"****"+data.substring(length-5);
         }
-        String num = StringUtils.right(id, 4);
-        return StringUtils.leftPad(num, StringUtils.length(id), "*");
+        return data;
     }
 
     /**
-     * 【固定电话 后四位，其他隐藏，比如1234
      *
-     * @param num
-     * @return
+     * @param data--7
+     * @return 固话
      */
-    public static String fixedPhone(String num) {
-        if (StringUtils.isBlank(num)) {
-            return "";
+    private static String getTel(String data){
+        int length = data.length();
+        if(length>3){//区号不隐藏，7-8位电话号码保留最后3位
+            data = getReplaceCharStr(length-3)+data.substring(length-3);
+            return data;
+        }else {
+            return getDefault(data);//规则之外走默认
         }
-        return StringUtils.leftPad(StringUtils.right(num, 4), StringUtils.length(num), "*");
     }
 
     /**
-     * 【手机号码】前三位，后四位，其他隐藏，比如135****6810
      *
-     * @param num
-     * @return
+     * @param data--8
+     * @return 邮箱
      */
-    public static String mobilePhone(String num) {
-        if (StringUtils.isBlank(num)) {
-            return "";
+    private static String getEmail(String data){
+        int length = data.length();
+        //“@”前小于等于4位的，隐藏第1位；大于4位的，保留前3位
+        if(length>0){
+            int index = data.indexOf('@');
+            if(index>0){
+                String str= data.substring(0,index);
+                if(str.length()<=4){
+                    data = "*"+data.substring(1);
+                }else{
+                    data = "***"+data.substring(3);
+                }
+            }
+
         }
-        return StringUtils.left(num, 3).concat(StringUtils.removeStart(StringUtils.leftPad(StringUtils.right(num, 4), StringUtils.length(num), "*"), "***"));
+        return data;
+    }
+    /**
+     *
+     * @param data--9
+     * @return QQ
+     */
+    private static String getQQ(String data){
+        int length = data.length();
+        //保留前2位和最后1位
+        if(length<4){
+            return getDefault(data);//规则之外走默认
+        }else{
+            data = data.substring(0, 2)+getReplaceCharStr(length-3)+data.substring(length-1);
+            return data;
+        }
+
     }
 
     /**
-     * 【地址】只显示到地区，不显示详细地址，比如：北京市海淀区****
      *
-     * @param address
-     * @param sensitiveSize 敏感信息长度
-     * @return
+     * @param data--10
+     * @return 居民身份证号、驾驶证号 ;
      */
-    public static String address(String address, int sensitiveSize) {
-        if (StringUtils.isBlank(address)) {
-            return "";
+    private static String getIdCard(String data){
+        int length = data.length();
+        if(length<11){
+            return getDefault(data);//规则之外走默认
+        }else{//保留前6位和最后4位
+            data = data.substring(0,6)+getReplaceCharStr(length-10)+data.substring(length-4);
+            return data;
         }
-        int length = StringUtils.length(address);
-        return StringUtils.rightPad(StringUtils.left(address, length - sensitiveSize), length, "*");
     }
 
     /**
-     * 【电子邮箱 邮箱前缀仅显示第一个字母，前缀其他隐藏，用星号代替，@及后面的地址显示，比如：d**@126.com>
      *
-     * @param email
-     * @return
+     * @param data--11
+     * @return 护照号；保留1位字母和最后3位数字
      */
-    public static String email(String email) {
-        if (StringUtils.isBlank(email)) {
-            return "";
+    private static String getSoldierCard(String data){
+        int length = data.length();
+        if(length<4){
+            return getDefault(data);//规则之外走默认
+        }else{//保留最后3位
+            data = getReplaceCharStr(length-3)+data.substring(length-3);
+            return data;
         }
-        int index = StringUtils.indexOf(email, "@");
-        if (index <= 1)
-            return email;
-        else
-            return StringUtils.rightPad(StringUtils.left(email, 1), index, "*").concat(StringUtils.mid(email, index, StringUtils.length(email)));
     }
 
     /**
-     * 【银行卡号】前六位，后四位，其他用星号隐藏每位1个星号，比如：6222600**********1234>
      *
-     * @param cardNum
-     * @return
+     * @param data--12
+     * @return 护照号；
      */
-    public static String bankCard(String cardNum) {
-        if (StringUtils.isBlank(cardNum)) {
-            return "";
+    private static String getPassportNo(String data){
+        int length = data.length();
+        if(length<5){
+            return getDefault(data);//规则之外走默认
+        }else{//保留1位字母和最后3位数字
+            data = data.substring(0,1)+getReplaceCharStr(length-4)+data.substring(length-3);
+            return data;
         }
-        return StringUtils.left(cardNum, 6).concat(StringUtils.removeStart(StringUtils.leftPad(StringUtils.right(cardNum, 4), StringUtils.length(cardNum), "*"), "******"));
+    }
+    /**
+     *
+     * @param data--13
+     * @return 台胞证号；
+     */
+    private static String getTaiWaiIdCard(String data){
+        int length = data.length();
+        if(length<8){
+            return getDefault(data);//规则之外走默认
+        }else{//保留第5-8位
+            data = getReplaceCharStr(4)+data.substring(4,8)+getReplaceCharStr(length-8);
+            return data;
+        }
+    }
+    /**
+     *
+     * @param data--14
+     * @return 车牌号；鲁AN8577->鲁A***77
+     */
+    private static String getCarNo(String data){
+        int length = data.length();
+        if(length<5){
+            return getDefault(data);//规则之外走默认
+        }else{//保留地区编码和流水号最后2位
+            data =data.substring(0,2)+ getReplaceCharStr(length-4)+data.substring(length-2);
+            return data;
+        }
+    }
+    /**
+     *
+     * @param data--15
+     * @return  车架号；
+     */
+    private static String getCarFrame(String data){
+        int length = data.length();
+        if(length<7){
+            return getDefault(data);//规则之外走默认
+        }else{//保留最后6位。
+            data =getReplaceCharStr(length-6)+data.substring(length-6);
+            return data;
+        }
     }
 
     /**
-     * 【密码】密码的全部字符都用*代替，比如：******
      *
-     * @param password
-     * @return
+     * @param data--16
+     * @return  银行卡号||存折账号||增值税税号 ；
      */
-    public static String password(String password) {
-        if (StringUtils.isBlank(password)) {
-            return "";
+    private static String getBankNo(String data){
+        int length = data.length();
+        if(length<15){
+            return getDefault(data);//规则之外走默认
+        }else{//保留前4位和最后4位。
+            data =data.substring(0,4)+getReplaceCharStr(length-8)+data.substring(length-4);
+            return data;
         }
-        String pwd = StringUtils.left(password, 0);
-        return StringUtils.rightPad(pwd, StringUtils.length(password), "*");
+    }
+    /**
+     *
+     * @param data--17
+     * @return  增值税账户  ；
+     */
+    private static String getAddedValueTax(String data){
+        int length = data.length();
+        if(length<8){
+            return getDefault(data);//规则之外走默认
+        }else{//保留最后4位
+            data =getReplaceCharStr(length-4)+data.substring(length-4);
+            return data;
+        }
     }
 
+    /**
+     *
+     * @param length 生成固定长度的*
+     * @return
+     */
+    private static String getReplaceCharStr(int length){
+        String str = "";
+        for(int i= 1;i<=length;i++){
+            str+="*";
+        }
+        return  str;
+    }
+
+    /**
+     *
+     * @param data
+     * @return 都不满足情况下，获取默认加密方式
+     */
+    private static String getDefault(String data){
+        return getName(data);
+    }
 }

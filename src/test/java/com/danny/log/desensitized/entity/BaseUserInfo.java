@@ -40,7 +40,7 @@ public class BaseUserInfo extends BaseEntity{
 
     private String account;
 
-    @Desensitized(type = SensitiveTypeEnum.PASSWORD, isEffictiveMethod = "isEffictiveMethod")
+    @Desensitized(type = SensitiveTypeEnum.PASSWORD)
     private String password;
 
     @Desensitized(type = SensitiveTypeEnum.BANK_CARD)

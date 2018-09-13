@@ -21,7 +21,7 @@ public class DesensitizedBean {
     @Desensitized(type = SensitiveTypeEnum.ID_CARD,role = RoleTypeEnum.ID_CARD_ROLES)
     private String idCardNo;
 
-    @Desensitized(type = {SensitiveTypeEnum.MOBILE_PHONE,SensitiveTypeEnum.FIXED_PHONE},role = RoleTypeEnum.MOBILE_PHONE_ROLES,isEffictiveMethod = "isMobileOrfixedPhone")
+    @Desensitized(role = RoleTypeEnum.MOBILE_PHONE_ROLES,isEffictiveMethod = "isMobileOrfixedPhone")
     private String mobileNo;
 
     @Desensitized(type = SensitiveTypeEnum.PASSWORD,role = RoleTypeEnum.PASSWORD_ROLES)

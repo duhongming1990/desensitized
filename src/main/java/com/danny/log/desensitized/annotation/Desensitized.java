@@ -16,7 +16,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface Desensitized {
     /*脱敏类型(规则)*/
-    SensitiveTypeEnum[] type();
+    SensitiveTypeEnum[] type() default SensitiveTypeEnum.CHINESE_NAME;
 
     /*判断注解是否生效的方法*/
     String isEffictiveMethod() default "";

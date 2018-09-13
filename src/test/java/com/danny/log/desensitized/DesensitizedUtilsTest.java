@@ -25,7 +25,7 @@ public class DesensitizedUtilsTest {
         roles.add(RoleTypeEnum.ID_CARD_ROLES.name());
 
         DesensitizedUtils<DesensitizedBean> desensitizedBeanUtils = new DesensitizedUtils<>();
-        DesensitizedBean desensitizedBeanTemp = desensitizedBeanUtils.getDesensitizedObject(desensitizedBean,roles);
+        DesensitizedBean desensitizedBeanTemp = desensitizedBeanUtils.getDesensitizedObject(desensitizedBean);
 
         System.out.println("JSON.toJSONString(desensitizedBean) = " + JSON.toJSONString(desensitizedBean));
         System.out.println("JSON.toJSONString(desensitizedBeanTemp) = " + JSON.toJSONString(desensitizedBeanTemp));

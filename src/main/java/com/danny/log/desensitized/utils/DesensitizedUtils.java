@@ -2,11 +2,14 @@ package com.danny.log.desensitized.utils;
 
 import com.danny.log.desensitized.annotation.Desensitized;
 import com.danny.log.desensitized.enums.RoleTypeEnum;
+import com.danny.log.desensitized.enums.SensitiveTypeEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -145,11 +148,10 @@ public class DesensitizedUtils<T> {
         //处理自身的属性
         Desensitized annotation = field.getAnnotation(Desensitized.class);
         if (field.getType().equals(String.class) && null != annotation
-            //&& executeIsEffictiveMethod(javaBean, annotation)
+                //&& executeIsEffictiveMethod(javaBean, annotation)
                 ) {
             String valueStr = (String) value;
             if (StringUtils.isNotBlank(valueStr)) {
-
                 boolean isDesensitized = false;
                 //角色判断以及动态分配脱敏规则
                 if (CollectionUtils.isNotEmpty(this.roles)){
@@ -163,12 +165,51 @@ public class DesensitizedUtils<T> {
                     isDesensitized = true;
                 }
                 if(isDesensitized){
-                    field.set(javaBean, annotation.type().getDesensitizedType().setDesensitizedStr(valueStr).desensitized());
+                    if(StringUtils.isBlank(annotation.isEffictiveMethod())){
+                        field.set(javaBean, annotation.type()[0].getDesensitizedType().setDesensitizedStr(valueStr).desensitized());
+                    }else{
+                        field.set(javaBean, executeIsEffictiveMethod(javaBean,annotation).getDesensitizedType().setDesensitizedStr(valueStr).desensitized());
+                    }
                 }
             }
         }
     }
 
+    /**
+     * 执行某个对象中指定的方法
+     *
+     * @param javaBean     对象
+     * @param desensitized
+     * @return
+     */
+    private static SensitiveTypeEnum executeIsEffictiveMethod(Object javaBean, Desensitized desensitized) {
+        SensitiveTypeEnum isAnnotationEffictive = null;//注解默认生效
+        if (desensitized != null) {
+            String isEffictiveMethod = desensitized.isEffictiveMethod();
+            if (isNotEmpty(isEffictiveMethod)) {
+                try {
+                    Method method = javaBean.getClass().getMethod(isEffictiveMethod);
+                    method.setAccessible(true);
+                    isAnnotationEffictive = (SensitiveTypeEnum) method.invoke(javaBean);
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return isAnnotationEffictive;
+    }
+
+    private static boolean isNotEmpty(String str) {
+        return str != null && !"".equals(str);
+    }
+
+    private static boolean isEmpty(String str) {
+        return !isNotEmpty(str);
+    }
 
     /////////////////////////////////////车联网平台数据脱敏/////////////////////////////////////////////////////////
 

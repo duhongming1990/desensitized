@@ -1,8 +1,12 @@
 package com.danny.log.desensitized;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.danny.log.desensitized.annotation.Desensitized;
 import com.danny.log.desensitized.enums.RoleTypeEnum;
 import com.danny.log.desensitized.enums.SensitiveTypeEnum;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * @Author duhongming
@@ -17,7 +21,7 @@ public class DesensitizedBean {
     @Desensitized(type = SensitiveTypeEnum.ID_CARD,role = RoleTypeEnum.ID_CARD_ROLES)
     private String idCardNo;
 
-    @Desensitized(type = SensitiveTypeEnum.MOBILE_PHONE,role = RoleTypeEnum.MOBILE_PHONE_ROLES)
+    @Desensitized(type = {SensitiveTypeEnum.MOBILE_PHONE,SensitiveTypeEnum.FIXED_PHONE},role = RoleTypeEnum.MOBILE_PHONE_ROLES,isEffictiveMethod = "isMobileOrfixedPhone")
     private String mobileNo;
 
     @Desensitized(type = SensitiveTypeEnum.PASSWORD,role = RoleTypeEnum.PASSWORD_ROLES)
@@ -97,5 +101,22 @@ public class DesensitizedBean {
 
     public void setFixedPhone(String fixedPhone) {
         this.fixedPhone = fixedPhone;
+    }
+
+    /**
+     * 如果通讯号等于11位时，MOBILE_PHONE字段脱敏生效
+     * 如果通讯号包含-时，FIXED_PHONE字段脱敏生效
+     *
+     * @return
+     */
+    @JSONField(serialize=false)
+    public SensitiveTypeEnum isMobileOrfixedPhone() {
+        if (mobileNo.contains("-")){
+            return SensitiveTypeEnum.FIXED_PHONE;
+        }
+        if(mobileNo.length()==11){
+            return SensitiveTypeEnum.MOBILE_PHONE;
+        }
+        return SensitiveTypeEnum.MOBILE_PHONE;
     }
 }

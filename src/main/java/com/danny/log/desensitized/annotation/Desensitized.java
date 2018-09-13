@@ -16,7 +16,11 @@ import java.lang.annotation.*;
 @Documented
 public @interface Desensitized {
     /*脱敏类型(规则)*/
-    SensitiveTypeEnum type();
+    SensitiveTypeEnum[] type();
+
+    /*判断注解是否生效的方法*/
+    String isEffictiveMethod() default "";
+
 
     RoleTypeEnum[] role() default RoleTypeEnum.ALL_ROLES;
 }

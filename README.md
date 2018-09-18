@@ -4,17 +4,26 @@
 
 ### 项目说明
 
-目前项目核心代码只有3个包：annotation、enums、utils
+字段脱敏目前项目核心代码只有4个包：annotation、enums、type、utils
+生成PNG水印目前项目核心代码只有1个包：waterprint
 
 ```
-com.danny.log.desensitized
+com.danny.log
+
+             .desensitized
                           .annotation
-                                     .Desensitized
+                                .Desensitized
                           .enums
                                 .SensitiveTypeEnum
+                                .RoleTypeEnum
+                          .type
+                                .脱敏类型处理类
                           .utils
                                 .DesensitizedUtils
                                 .ObjectUtils
+                                
+             .waterprint
+                          .DrawTranslucentPngUtil
 ```
 
 1、Desensitized是标记敏感信息的注解，用于标记在需要脱敏的字段上，用法建test下的com.danny.log.desensitized.entity.BaseUserInfo类
@@ -27,9 +36,12 @@ com.danny.log.desensitized
 
 ### 使用方法：
 
-详见test包下的com.danny.log.desensitized.utils.DesensitizedUtilsTest类
+字段脱敏详见test包下的com.danny.log.desensitized.utils.DesensitizedUtilsTest类
+
+生成PNG水印test包下的com.danny.log.waterprint.DrawTranslucentPngUtilTest
 
 ### 博客链接：
+
 数据脱敏——什么是数据脱敏：http://blog.csdn.net/huyuyang6688/article/details/77689459
 
 数据脱敏——基于自定义注解实现日志脱敏 http://blog.csdn.net/huyuyang6688/article/details/77759844

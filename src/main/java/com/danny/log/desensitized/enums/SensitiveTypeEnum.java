@@ -11,35 +11,35 @@ public enum SensitiveTypeEnum {
     /**
      * 中文名
      */
-    CHINESE_NAME(new ChineseNameType()),
+    CHINESE_NAME(new ChineseNameTypeBase()),
     /**
      * 身份证号
      */
-    ID_CARD(new IdCardType()),
+    ID_CARD(new IdCardTypeBase()),
     /**
      * 座机号
      */
-    FIXED_PHONE(new FixedPhoneType()),
+    FIXED_PHONE(new FixedPhoneTypeBase()),
     /**
      * 手机号
      */
-    MOBILE_PHONE(new MobilePhoneType()),
+    MOBILE_PHONE(new MobilePhoneTypeBase()),
     /**
      * 地址
      */
-    ADDRESS(new AddressType()),
+    ADDRESS(new AddressTypeBase()),
     /**
      * 电子邮件
      */
-    EMAIL(new EmailType()),
+    EMAIL(new EmailTypeBase()),
     /**
      * 银行卡
      */
-    BANK_CARD(new BankCardType()),
+    BANK_CARD(new BankCardTypeBase()),
     /**
      * 密码
      */
-    PASSWORD(new PasswordType());
+    PASSWORD(new PasswordTypeBase());
 //
 //
 //    /////////////////////////////////////车联网平台数据脱敏/////////////////////////////////////////////////////////
@@ -77,17 +77,17 @@ public enum SensitiveTypeEnum {
 //
 //    TYPE_ADDED_VALUE_TAX;//如：增值税账户  ；保留最后4位
 
-    private DesensitizedType desensitizedType;
+    private BaseDesensitizedType baseDesensitizedType;
 
-    SensitiveTypeEnum(DesensitizedType desensitizedType){
-        this.desensitizedType = desensitizedType;
+    SensitiveTypeEnum(BaseDesensitizedType baseDesensitizedType){
+        this.baseDesensitizedType = baseDesensitizedType;
     }
 
-    public DesensitizedType getDesensitizedType() {
-        return desensitizedType;
+    public BaseDesensitizedType getBaseDesensitizedType() {
+        return baseDesensitizedType;
     }
 
-    public void setDesensitizedType(DesensitizedType desensitizedType) {
-        this.desensitizedType = desensitizedType;
+    public void setBaseDesensitizedType(BaseDesensitizedType baseDesensitizedType) {
+        this.baseDesensitizedType = baseDesensitizedType;
     }
 }

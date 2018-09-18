@@ -1,10 +1,11 @@
-package com.danny.log.desensitized;
+package com.danny.log.desensitized.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.danny.log.desensitized.annotation.Desensitized;
 import com.danny.log.desensitized.enums.RoleTypeEnum;
 import com.danny.log.desensitized.enums.SensitiveTypeEnum;
 
+import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -13,6 +14,7 @@ import java.lang.reflect.Method;
  * @Email 19919902414@189.cn
  * @Date 2018/9/6 15:37
  */
+@Deprecated
 public class DesensitizedBean {
 
     @Desensitized(type = SensitiveTypeEnum.CHINESE_NAME,role = RoleTypeEnum.CHINESE_NAME_ROLES)

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
  * @Email 19919902414@189.cn
  * @Date 2018/9/6 16:56
  */
-public class EmailType extends DesensitizedType {
+public class EmailTypeBase extends BaseDesensitizedType {
     @Override
     public String desensitized() {
         return email(desensitizedStr);
@@ -24,9 +24,10 @@ public class EmailType extends DesensitizedType {
             return "";
         }
         int index = StringUtils.indexOf(email, "@");
-        if (index <= 1)
+        if (index <= 1) {
             return email;
-        else
+        } else {
             return StringUtils.rightPad(StringUtils.left(email, 1), index, "*").concat(StringUtils.mid(email, index, StringUtils.length(email)));
+        }
     }
 }

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
  * @Email 19919902414@189.cn
  * @Date 2018/9/6 16:55
  */
-public class AddressType extends DesensitizedType {
+public class AddressTypeBase extends BaseDesensitizedType {
     @Override
     public String desensitized() {
         return address(desensitizedStr,8);

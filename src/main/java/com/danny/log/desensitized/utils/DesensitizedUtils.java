@@ -166,9 +166,9 @@ public class DesensitizedUtils<T> {
                 }
                 if(isDesensitized){
                     if(StringUtils.isBlank(annotation.isEffictiveMethod())){
-                        field.set(javaBean, annotation.type()[0].getDesensitizedType().setDesensitizedStr(valueStr).desensitized());
+                        field.set(javaBean, annotation.type()[0].getBaseDesensitizedType().setDesensitizedStr(valueStr).desensitized());
                     }else{
-                        field.set(javaBean, executeIsEffictiveMethod(javaBean,annotation).getDesensitizedType().setDesensitizedStr(valueStr).desensitized());
+                        field.set(javaBean, executeIsEffictiveMethod(javaBean,annotation).getBaseDesensitizedType().setDesensitizedStr(valueStr).desensitized());
                     }
                 }
             }

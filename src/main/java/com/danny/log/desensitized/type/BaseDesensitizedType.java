@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
  * @Email 19919902414@189.cn
  * @Date 2018/9/6 16:19
  */
-public abstract class DesensitizedType {
+public abstract class BaseDesensitizedType {
 
     public String desensitizedStr;
 
@@ -16,7 +16,7 @@ public abstract class DesensitizedType {
         return StringUtils.EMPTY;
     }
 
-    public DesensitizedType setDesensitizedStr(String desensitizedStr) {
+    public BaseDesensitizedType setDesensitizedStr(String desensitizedStr) {
         this.desensitizedStr = desensitizedStr;
         return this;
     }

@@ -1,4 +1,4 @@
-package com.danny.log.desensitized;
+package com.danny.log.desensitized.utils;
 
 import com.danny.log.desensitized.entity.UserInfo;
 

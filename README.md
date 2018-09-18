@@ -5,6 +5,7 @@
 ### 项目说明
 
 字段脱敏目前项目核心代码只有4个包：annotation、enums、type、utils
+
 生成PNG水印目前项目核心代码只有1个包：waterprint
 
 ```
@@ -38,7 +39,7 @@ com.danny.log
 
 字段脱敏详见test包下的com.danny.log.desensitized.utils.DesensitizedUtilsTest类
 
-生成PNG水印test包下的com.danny.log.waterprint.DrawTranslucentPngUtilTest
+生成PNG水印test包下的com.danny.log.waterprint.DrawTranslucentPngUtilTest类
 
 ### 博客链接：
 

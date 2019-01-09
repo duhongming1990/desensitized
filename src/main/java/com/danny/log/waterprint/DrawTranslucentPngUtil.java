@@ -34,7 +34,7 @@ public class DrawTranslucentPngUtil {
                 //字体居中
                 FontRenderContext frc =
                         new FontRenderContext(null, true, true);
-                Font font= new Font("微软雅黑", Font.PLAIN, fontHeight);
+                Font font= new Font("宋体", Font.PLAIN, fontHeight);
                 Rectangle2D r2D = font.getStringBounds(splitStr[i], frc);
                 int rWidth = (int) Math.round(r2D.getWidth());
                 int rX = (int) Math.round(r2D.getX());

@@ -90,4 +90,14 @@ public enum SensitiveTypeEnum {
     public void setBaseDesensitizedType(BaseDesensitizedType baseDesensitizedType) {
         this.baseDesensitizedType = baseDesensitizedType;
     }
+
+    public BaseDesensitizedType getBaseDesensitizedType(String code){
+        SensitiveTypeEnum[] sensitiveTypeEnums = SensitiveTypeEnum.values();
+        for(SensitiveTypeEnum sensitiveTypeEnum:sensitiveTypeEnums){
+            if(sensitiveTypeEnum.name().equals(code)){
+                return sensitiveTypeEnum.getBaseDesensitizedType();
+            }
+        }
+        throw new RuntimeException("没有该脱敏类型！");
+    }
 }

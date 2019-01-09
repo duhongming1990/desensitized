@@ -11,7 +11,8 @@ public class DrawTranslucentPngUtilTest {
     @Test
     public void test(){
         BufferedImage bufferedImageTemp = DrawTranslucentPngUtil.drawTranslucentStringPic(
-                255, 217, 30,
+                255, 217,
+                30,
                 "00203219\n0601\n158143024\n20180917102134");
         BufferedImage bufferedImage = DrawTranslucentPngUtil.rotateImage(bufferedImageTemp,315);
         File imgFile = new File("D://tuomin.png");

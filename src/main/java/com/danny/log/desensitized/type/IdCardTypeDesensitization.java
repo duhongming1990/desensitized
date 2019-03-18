@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
  * @Email 19919902414@189.cn
  * @Date 2018/9/6 16:33
  */
-public class IdCardTypeBase extends BaseDesensitizedType {
+public class IdCardTypeDesensitization extends BaseDesensitizedType {
 
     @Override
     public String desensitized() {

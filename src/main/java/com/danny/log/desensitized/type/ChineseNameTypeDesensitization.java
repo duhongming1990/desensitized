@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
  * @Email 19919902414@189.cn
  * @Date 2018/9/6 16:21
  */
-public class ChineseNameTypeBase extends BaseDesensitizedType {
+public class ChineseNameTypeDesensitization extends BaseDesensitizedType {
 
     @Override
     public String desensitized() {

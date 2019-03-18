@@ -11,35 +11,35 @@ public enum SensitiveTypeEnum {
     /**
      * 中文名
      */
-    CHINESE_NAME(new ChineseNameTypeBase()),
+    CHINESE_NAME(new ChineseNameTypeDesensitization()),
     /**
      * 身份证号
      */
-    ID_CARD(new IdCardTypeBase()),
+    ID_CARD(new IdCardTypeDesensitization()),
     /**
      * 座机号
      */
-    FIXED_PHONE(new FixedPhoneTypeBase()),
+    FIXED_PHONE(new FixedPhoneTypeDesensitization()),
     /**
      * 手机号
      */
-    MOBILE_PHONE(new MobilePhoneTypeBase()),
+    MOBILE_PHONE(new MobilePhoneTypeDesensitization()),
     /**
      * 地址
      */
-    ADDRESS(new AddressTypeBase()),
+    ADDRESS(new AddressTypeDesensitization()),
     /**
      * 电子邮件
      */
-    EMAIL(new EmailTypeBase()),
+    EMAIL(new EmailTypeDesensitization()),
     /**
      * 银行卡
      */
-    BANK_CARD(new BankCardTypeBase()),
+    BANK_CARD(new BankCardTypeDesensitization()),
     /**
      * 密码
      */
-    PASSWORD(new PasswordTypeBase());
+    PASSWORD(new PasswordTypeDesensitization());
 //
 //
 //    /////////////////////////////////////车联网平台数据脱敏/////////////////////////////////////////////////////////
